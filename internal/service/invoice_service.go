@@ -46,3 +46,35 @@ func (s *InvoiceService) CreateInvoice(input *dto.CreateInvoiceinput) (*dto.Invo
 	output := dto.FromInvoice(invoice)
 	return &output, nil
 }
+
+func (s *InvoiceService) FindByID(id string, apiKey string) (*dto.InvoiceOutput, error) {
+	invoice, err := s.invoiceRepository.FindByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	accountOutput, err := s.accountService.FindByAPIKey(apiKey)
+	if err != nil {
+		return nil, err
+	}
+
+	if invoice.AccountID != accountOutput.ID {
+		return nil, domain.ErrInvoiceNotFound
+	}
+
+	output := dto.FromInvoice(invoice)
+	return &output, nil
+}
+
+func (s *InvoiceService) FindByAccountID(accountID string) ([]*dto.InvoiceOutput, error) {
+	invoices, err := s.invoiceRepository.FindByAccountID(accountID)
+	if err != nil {
+		return nil, err
+	}
+	output := make([]*dto.InvoiceOutput, len(invoices))
+	for i, invoice := range invoices {
+		invoiceOutput := dto.FromInvoice(invoice)
+		output[i] = &invoiceOutput
+	}
+	return output, nil
+}
