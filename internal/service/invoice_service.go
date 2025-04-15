@@ -78,3 +78,12 @@ func (s *InvoiceService) FindByAccountID(accountID string) ([]*dto.InvoiceOutput
 	}
 	return output, nil
 }
+
+func (s *InvoiceService) FindByAccountAPIKey(apiKey string) ([]*dto.InvoiceOutput, error) {
+	output, err := s.accountService.FindByAPIKey(apiKey)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.FindByAccountAPIKey(output.ID)
+}
